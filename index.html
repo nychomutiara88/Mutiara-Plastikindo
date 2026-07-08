@@ -607,6 +607,21 @@ document.getElementById("ticketForm").addEventListener("submit", async function(
   }
 });
 
+// ===== AUTO KAPITAL untuk kolom teks =====
+(function(){
+  const fieldKapital = ["namaPelanggan", "alamatPelanggan", "nomorPO"];
+  fieldKapital.forEach(function(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.style.textTransform = "uppercase";      // tampilan langsung kapital
+    el.addEventListener("input", function(){
+      const s = this.selectionStart, e = this.selectionEnd;
+      this.value = this.value.toUpperCase();    // nilai yg tersimpan juga kapital
+      try { this.setSelectionRange(s, e); } catch(_){}
+    });
+  });
+})();
+
 calcTotals();
 </script>
 </body>
