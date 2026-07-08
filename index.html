@@ -272,11 +272,11 @@
 
         <div class="field">
           <label>Nama Pelanggan <span class="req">*</span></label>
-          <input type="text" id="namaPelanggan" placeholder="cth. Toko Sumber Jaya" required>
+          <input type="text" id="namaPelanggan" placeholder="Cth. CV Mutiara Plastikindo" required>
         </div>
         <div class="field">
           <label>No. Pelanggan <span class="opt">(opsional)</span></label>
-          <input type="number" id="noPelanggan" placeholder="cth. 10234">
+          <input type="number" id="noPelanggan" placeholder="Cth. 08xx xxxx xxxx">
         </div>
 
         <div class="field full">
@@ -291,7 +291,7 @@
 
         <div class="field">
           <label>Nomor Purchase Order <span class="opt">(opsional)</span></label>
-          <input type="text" id="nomorPO" placeholder="cth. PO/2026/0012">
+          <input type="text" id="nomorPO" placeholder="Cth. PO/2026/0001">
         </div>
         <div class="field">
           <label>Pajak PPN 11%</label>
@@ -352,7 +352,7 @@ const SALES_LIST = [
 ]; // EDIT: ganti dengan nama sales sesungguhnya
 
 const BARANG_LIST = [
-  "Plastik PE", "Plastik PP", "Plastik OPP", "Kantong Kresek", "Plastik Vacuum", "Sealing Bag"
+  "Bubblewrap Hitam","Bubblewrap Bening"
 ]; // EDIT: ganti dengan nama barang sesungguhnya
 
 const ITEM_SIZE_LIST = ["2 Kg", "2.5 Kg", "3 Kg"];
@@ -438,7 +438,7 @@ function makeItemCard(){
         <select class="f-cover" required></select>
       </div>
       <div class="field">
-        <label>Harga (per unit) <span class="req">*</span></label>
+        <label>Harga (per roll) <span class="req">*</span></label>
         <input type="number" min="0" step="100" class="f-harga" placeholder="0" required>
       </div>
       <div class="item-subtotal-row">Subtotal: <span class="f-subtotal">Rp 0</span></div>
