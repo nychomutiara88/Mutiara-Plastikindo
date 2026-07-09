@@ -237,6 +237,13 @@
   }
   .link-btn:hover{ background:var(--blue-50); }
 
+  .edit-bar{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .edit-bar .link-btn{ margin-top:0; padding:10px 22px; }
+  .edit-hint{ font-size:.8rem; color:var(--muted); font-weight:500; }
+
   .footer-note{ text-align:center; color:var(--muted); font-size:.78rem; margin-top:40px; letter-spacing:.02em; }
 
   @media (max-width: 620px){
@@ -399,9 +406,15 @@ const HARI  = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
 const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
 let itemCount = 0;
+let currentTicketCode = null;   // ECO tiket yang sedang diproses (untuk fitur Kembali & Edit tanpa duplikat)
 
 /* ---------- util ---------- */
 function pad2(n){ return String(n).padStart(2,"0"); }
+function formatTanggalKirim(iso){          // "yyyy-mm-dd" -> "dd/mm/yyyy"
+  if(!iso) return "-";
+  const p = String(iso).split("-");
+  return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso;
+}
 function stampText(d){
   return `${HARI[d.getDay()]}, ${pad2(d.getDate())} ${BULAN[d.getMonth()]} ${d.getFullYear()} · ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
 }
@@ -636,6 +649,11 @@ document.getElementById("ticketForm").addEventListener("submit", async function(
     return;
   }
   const payload = buildPayload();
+  const isUpdate = !!currentTicketCode;          // true jika tiket ini sudah pernah dibuat lalu diedit
+  if (isUpdate){
+    payload.action = "updateTicket";
+    payload.ticketCode = currentTicketCode;      // timpa data lama, kode ECO tetap sama
+  }
 
   const btn = document.getElementById("submitBtn");
   btn.disabled = true; btn.textContent = "Mengirim...";
@@ -643,7 +661,7 @@ document.getElementById("ticketForm").addEventListener("submit", async function(
   try{
     let ticketCode;
     if (DEMO_MODE){
-      ticketCode = nextLocalEco();               // nomor sementara (offline)
+      ticketCode = currentTicketCode || nextLocalEco();   // nomor sementara (offline)
     } else {
       const res = await fetch(APPS_SCRIPT_URL, {
         method: "POST",
@@ -652,20 +670,22 @@ document.getElementById("ticketForm").addEventListener("submit", async function(
       });
       const data = await res.json();
       if (data.result !== "success") throw new Error(data.message || "Gagal menyimpan data");
-      ticketCode = data.ticketCode || nextLocalEco();
+      ticketCode = data.ticketCode || currentTicketCode || nextLocalEco();
     }
-    renderResult(payload, ticketCode);             // pindah ke layar summary + input SO
+    currentTicketCode = ticketCode;
+    renderResult(payload, ticketCode, isUpdate);           // pindah ke layar summary + input SO
     window.scrollTo({top:0, behavior:"smooth"});
   } catch(err){
     statusEl.className = "status-msg err";
     statusEl.textContent = "Terjadi kesalahan: " + err.message;
   } finally {
-    btn.disabled = false; btn.textContent = "Kirim Tiket";
+    btn.disabled = false;
+    btn.textContent = currentTicketCode ? "Perbarui Tiket" : "Kirim Tiket";
   }
 });
 
 /* ---------- RENDER HASIL TICKETING + INPUT SO ---------- */
-function renderResult(payload, code){
+function renderResult(payload, code, isUpdate){
   document.getElementById("ticketForm").style.display = "none";
   const box = document.getElementById("resultContainer");
   box.style.display = "";
@@ -685,13 +705,20 @@ function renderResult(payload, code){
     </tr>`).join("");
 
   box.innerHTML = `
+    <div class="edit-bar">
+      <button type="button" class="link-btn" id="backEditBtn">&larr; Kembali &amp; Edit</button>
+      <span class="edit-hint">Cek dulu ringkasannya. Ada yang salah? Klik untuk edit sebelum input SO.</span>
+    </div>
+
     <div class="panel">
       <div class="eco-hero">
         <div class="eco-caption">Kode Ticketing</div>
         <div class="eco-badge">${code}</div>
       </div>
       <div class="success-note">
-        Yeay ! Tiketing kamu sudah berhasil di input dengan kode tiketing : <b>${code}</b>
+        ${ isUpdate
+            ? `Ringkasan tiket <b>${code}</b> berhasil diperbarui. Silakan lanjut input SO.`
+            : `Yeay! Tiketing kamu sudah berhasil di input dengan kode tiketing nomer urut terbaru: <b>${code}</b>` }
       </div>
     </div>
 
@@ -699,7 +726,7 @@ function renderResult(payload, code){
       <div class="panel-title">Ringkasan Tiket <small>${NAMA_PRODUK}</small></div>
       <div class="sum-grid">
         <div class="sum-line"><span class="k">Tanggal Input</span><span class="v">${payload.tanggalInput}</span></div>
-        <div class="sum-line"><span class="k">Tanggal Kirim</span><span class="v">${payload.tanggalKiriman || "-"}</span></div>
+        <div class="sum-line"><span class="k">Tanggal Kirim</span><span class="v">${formatTanggalKirim(payload.tanggalKiriman)}</span></div>
         <div class="sum-line"><span class="k">Nama Sales</span><span class="v">${payload.namaSales}</span></div>
         <div class="sum-line"><span class="k">Nomor PO</span><span class="v">${payload.nomorPO || "-"}</span></div>
         <div class="sum-line"><span class="k">Nama Pelanggan</span><span class="v">${payload.namaPelanggan}</span></div>
@@ -752,6 +779,18 @@ function renderResult(payload, code){
   });
 
   document.getElementById("finishBtn").addEventListener("click", ()=>finishTicket(code, payload));
+  document.getElementById("backEditBtn").addEventListener("click", backToEdit);
+}
+
+/* ---------- kembali ke form untuk edit (data tetap tersimpan) ---------- */
+function backToEdit(){
+  document.getElementById("resultContainer").style.display = "none";
+  document.getElementById("resultContainer").innerHTML = "";
+  const form = document.getElementById("ticketForm");
+  form.style.display = "";
+  document.getElementById("statusMsg").textContent = "";
+  document.getElementById("submitBtn").textContent = currentTicketCode ? "Perbarui Tiket" : "Kirim Tiket";
+  window.scrollTo({top:0, behavior:"smooth"});
 }
 
 /* ---------- SUBMIT (tahap 2: input SO -> selesai) ---------- */
@@ -783,6 +822,7 @@ async function finishTicket(code, payload){
       const data = await res.json();
       if(data.result !== "success") throw new Error(data.message || "Gagal menyimpan Nomor SO");
     }
+    currentTicketCode = null;   // tiket sudah final, siklus berikutnya buat kode baru
     renderComplete(code, so, payload);
     window.scrollTo({top:0, behavior:"smooth"});
   } catch(err){
@@ -816,9 +856,11 @@ function renderComplete(code, so, payload){
 
 /* ---------- reset untuk tiket baru ---------- */
 function resetAll(){
+  currentTicketCode = null;
   const form = document.getElementById("ticketForm");
   form.reset();
   form.querySelectorAll("input,select").forEach(el=>el.classList.remove("touched"));
+  document.getElementById("submitBtn").textContent = "Kirim Tiket";
   document.getElementById("infoPajakWrap").style.display = "none";
   fillSelect(document.getElementById("namaSales"), SALES_LIST, "— pilih sales —");
 
@@ -833,6 +875,26 @@ function resetAll(){
   document.getElementById("statusMsg").textContent = "";
   window.scrollTo({top:0, behavior:"smooth"});
 }
+
+/* ---------- No. Pelanggan: hanya angka ---------- */
+(function(){
+  const el = document.getElementById("noPelanggan");
+  if(!el) return;
+  el.addEventListener("input", function(){
+    const before = this.value;
+    const caret = this.selectionStart;
+    const cleaned = before.replace(/[^0-9]/g, "");
+    if(cleaned !== before){
+      const removed = before.length - cleaned.length;
+      this.value = cleaned;
+      const pos = Math.max(0, caret - removed);
+      try{ this.setSelectionRange(pos, pos); }catch(_){}
+    }
+  });
+  el.addEventListener("keypress", function(e){
+    if(e.key.length === 1 && !/[0-9]/.test(e.key)) e.preventDefault();
+  });
+})();
 
 /* ---------- auto kapital kolom teks ---------- */
 (function(){
