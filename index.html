@@ -539,7 +539,7 @@ function updateQtyInfo(card){
   const hasil = potRaw === "" ? 0 : qty * potonganToNumber(potRaw);
   card.querySelector(".f-qtyinfo").innerHTML =
     `<span>Potongan: <b>${potRaw || "-"}</b></span>` +
-    `<span>Qty Total: <b>${qty}</b></span>` +
+    `<span>Qty Total: <b>${qty}</b></span>`;
 }
 
 function updateItemSubtotal(card){
