@@ -315,8 +315,8 @@
         </div>
 
         <div class="field full">
-          <label>Share Location <span class="req">*</span></label>
-          <input type="text" id="shareLocation" placeholder="TEMPEL LINK GOOGLE MAPS DI SINI" required>
+          <label>Lokasi Maps Pelanggan <span class="req">*</span></label>
+          <input type="text" id="lokasimapspelanggan" placeholder="TEMPEL LINK GOOGLE MAPS DI SINI" required>
         </div>
 
         <div class="field">
@@ -621,7 +621,7 @@ function buildPayload(){
     namaPelanggan: document.getElementById("namaPelanggan").value,
     noPelanggan: document.getElementById("noPelanggan").value,
     alamatPelanggan: document.getElementById("alamatPelanggan").value,
-    shareLocation: document.getElementById("shareLocation").value,
+    lokasimapspelanggan: document.getElementById("lokasimapspelanggan").value,
     nomorPO: document.getElementById("nomorPO").value,
     tanggalKiriman: document.getElementById("tanggalKiriman").value,
     ppn: document.getElementById("ppn").value,
@@ -731,7 +731,7 @@ function renderResult(payload, code, isUpdate){
         <div class="sum-line"><span class="k">Nama Pelanggan</span><span class="v">${payload.namaPelanggan}</span></div>
         <div class="sum-line"><span class="k">No. Pelanggan</span><span class="v">${payload.noPelanggan || "-"}</span></div>
         <div class="sum-line full"><span class="k">Alamat</span><span class="v">${payload.alamatPelanggan}</span></div>
-        <div class="sum-line full"><span class="k">Share Location</span><span class="v">${payload.shareLocation}</span></div>
+        <div class="sum-line full"><span class="k">Lokasi Maps Pelanggan</span><span class="v">${payload.lokasimapspelanggan}</span></div>
         <div class="sum-line"><span class="k">PPN 11%</span><span class="v">${payload.ppn}${payload.ppn==="Ya" && payload.infoPajak ? " — "+payload.infoPajak : ""}</span></div>
       </div>
 
