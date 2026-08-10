@@ -337,6 +337,11 @@
           <input type="text" inputmode="numeric" id="ongkosKirim" placeholder="Cth. 150000">
         </div>
 
+        <div class="field full">
+          <label>Keterangan Lainnya <span class="opt">(opsional)</span></label>
+          <input type="text" id="keteranganLainnya" placeholder="Informasi tambahan (opsional)">
+        </div>
+
         <div class="field full" id="infoPajakWrap" style="display:none;">
           <label>Info Pajak <span class="opt">(opsional)</span></label>
           <select id="infoPajak">
@@ -650,6 +655,7 @@ function buildPayload(){
     tanggalKiriman: document.getElementById("tanggalKiriman").value,
     ppn: document.getElementById("ppn").value,
     infoPajak: document.getElementById("infoPajak").value,
+    keteranganLainnya: document.getElementById("keteranganLainnya").value,
     items: items,
     subtotal: t.subtotal,
     ppnAmount: t.ppnAmount,
@@ -754,6 +760,7 @@ function renderResult(payload, code, isUpdate){
         <div class="sum-line"><span class="k">Nomor PO</span><span class="v">${payload.nomorPO || "-"}</span></div>
         <div class="sum-line"><span class="k">Nama Pelanggan</span><span class="v">${payload.namaPelanggan}</span></div>
         <div class="sum-line"><span class="k">No. Pelanggan</span><span class="v">${payload.noPelanggan || "-"}</span></div>
+        <div class="sum-line full"><span class="k">Keterangan Lainnya</span><span class="v">${payload.keteranganLainnya || "-"}</span></div>
         <div class="sum-line full"><span class="k">Alamat</span><span class="v">${payload.alamatPelanggan}</span></div>
         <div class="sum-line full"><span class="k">Lokasi Maps Pelanggan</span><span class="v">${payload.lokasimapspelanggan}</span></div>
         <div class="sum-line"><span class="k">PPN 11%</span><span class="v">${payload.ppn}${payload.ppn==="Ya" && payload.infoPajak ? " — "+payload.infoPajak : ""}</span></div>
