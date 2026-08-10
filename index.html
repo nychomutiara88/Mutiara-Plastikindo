@@ -760,10 +760,10 @@ function renderResult(payload, code, isUpdate){
         <div class="sum-line"><span class="k">Nomor PO</span><span class="v">${payload.nomorPO || "-"}</span></div>
         <div class="sum-line"><span class="k">Nama Pelanggan</span><span class="v">${payload.namaPelanggan}</span></div>
         <div class="sum-line"><span class="k">No. Pelanggan</span><span class="v">${payload.noPelanggan || "-"}</span></div>
-        <div class="sum-line full"><span class="k">Keterangan Lainnya</span><span class="v">${payload.keteranganLainnya || "-"}</span></div>
         <div class="sum-line full"><span class="k">Alamat</span><span class="v">${payload.alamatPelanggan}</span></div>
         <div class="sum-line full"><span class="k">Lokasi Maps Pelanggan</span><span class="v">${payload.lokasimapspelanggan}</span></div>
         <div class="sum-line"><span class="k">PPN 11%</span><span class="v">${payload.ppn}${payload.ppn==="Ya" && payload.infoPajak ? " — "+payload.infoPajak : ""}</span></div>
+        <div class="sum-line full"><span class="k">Keterangan Lainnya</span><span class="v">${payload.keteranganLainnya || "-"}</span></div>
       </div>
 
       <div class="sum-table-wrap" style="margin-top:18px;">
