@@ -330,6 +330,11 @@
             <option value="Ya">Ya</option>
           </select>
         </div>
+        
+        <div class="field">
+          <label>Ongkos Kirim <span class="opt">(opsional)</span></label>
+          <input type="text" inputmode="numeric" id="ongkosKirim" placeholder="Cth. 150000">
+        </div>
 
         <div class="field full" id="infoPajakWrap" style="display:none;">
           <label>Info Pajak <span class="opt">(opsional)</span></label>
@@ -356,6 +361,7 @@
       <div class="grid-summary">
         <div class="summary-row"><span>Subtotal Barang</span><span id="sumSubtotal">Rp 0</span></div>
         <div class="summary-row" id="sumPpnRow" style="display:none;"><span id="sumPpnLabel">PPN 11%</span><span id="sumPpn">Rp 0</span></div>
+        <div class="summary-row" id="sumOngkirRow" style="display:none;"><span>Ongkos Kirim</span><span id="sumOngkir">Rp 0</span></div>
         <div class="summary-row total"><span>Total Tagihan</span><span id="sumTotal">Rp 0</span></div>
       </div>
     </div>
@@ -451,6 +457,19 @@ document.getElementById("ppn").addEventListener("change", (e)=>{
 });
 document.getElementById("infoPajak").addEventListener("change", calcTotals);
 
+document.getElementById("ongkosKirim").addEventListener("input", function(){
+  const before = this.value;
+  const caret = this.selectionStart;
+  const cleaned = before.replace(/[^0-9]/g, "");   // hanya angka
+  if (cleaned !== before){
+    const removed = before.length - cleaned.length;
+    this.value = cleaned;
+    const pos = Math.max(0, caret - removed);
+    try{ this.setSelectionRange(pos, pos); }catch(_){}
+  }
+  calcTotals();
+});
+  
 /* ---------- kartu barang ---------- */
 function makeItemCard(){
   itemCount++;
@@ -558,6 +577,7 @@ function computeTotals(){
   });
   const ppn = document.getElementById("ppn").value;
   const infoPajak = document.getElementById("infoPajak").value;
+  const ongkir = parseFloat((document.getElementById("ongkosKirim").value || "").replace(/[^0-9]/g, "")) || 0;
   let ppnAmount = 0, total = subtotal, label = "PPN 11%", showPpn = false;
 
   if (ppn === "Ya"){
@@ -572,13 +592,16 @@ function computeTotals(){
       label = "PPN 11% (ditambahkan)";
     }
   }
-  return { subtotal, ppnAmount, total, label, showPpn };
+  total = total + ongkir;              // Ongkos Kirim ditambahkan ke total akhir (tidak kena PPN)
+  return { subtotal, ppnAmount, ongkir, total, label, showPpn };
 }
 
 function calcTotals(){
   const t = computeTotals();
   document.getElementById("sumPpnRow").style.display = t.showPpn ? "flex" : "none";
   document.getElementById("sumPpnLabel").textContent = t.label;
+  document.getElementById("sumOngkirRow").style.display = t.ongkir > 0 ? "flex" : "none";
+  document.getElementById("sumOngkir").textContent = formatRupiah(t.ongkir);
   document.getElementById("sumSubtotal").textContent = formatRupiah(t.subtotal);
   document.getElementById("sumPpn").textContent = formatRupiah(t.ppnAmount);
   document.getElementById("sumTotal").textContent = formatRupiah(t.total);
@@ -629,6 +652,7 @@ function buildPayload(){
     items: items,
     subtotal: t.subtotal,
     ppnAmount: t.ppnAmount,
+    ongkosKirim: t.ongkir,
     grandTotal: t.total
   };
 }
@@ -749,6 +773,7 @@ function renderResult(payload, code, isUpdate){
       <div class="grid-summary" style="margin-top:18px;">
         <div class="summary-row"><span>Subtotal Barang</span><span>${formatRupiah(payload.subtotal)}</span></div>
         ${payload.ppn==="Ya" ? `<div class="summary-row"><span>PPN 11%</span><span>${formatRupiah(payload.ppnAmount)}</span></div>` : ``}
+        ${payload.ongkosKirim>0 ? `<div class="summary-row"><span>Ongkos Kirim</span><span>${formatRupiah(payload.ongkosKirim)}</span></div>` : ``}
         <div class="summary-row total"><span>Total Tagihan</span><span>${formatRupiah(payload.grandTotal)}</span></div>
       </div>
     </div>
