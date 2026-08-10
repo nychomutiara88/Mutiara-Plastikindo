@@ -929,7 +929,7 @@ function resetAll(){
 
 /* ---------- auto kapital kolom teks ---------- */
 (function(){
-  ["namaPelanggan","alamatPelanggan","nomorPO"].forEach(function(id){
+  ["namaPelanggan","alamatPelanggan","nomorPO","keteranganLainnya","noPelanggan"].forEach(function(id){
     const el = document.getElementById(id);
     if(!el) return;
     el.style.textTransform = "uppercase";
